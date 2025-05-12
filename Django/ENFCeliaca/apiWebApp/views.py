@@ -4,9 +4,12 @@ from rest_framework import status
 from .serializers import CeliacaPredictionSerializer
 import pickle
 import numpy as np
+import os
+from django.conf import settings
 
 # Cargar el modelo KNN previamente entrenado
-with open('MLENFCeliaca/modelo_knn.pkl', 'rb') as f:
+modelo_path = os.path.join(settings.BASE_DIR, 'apiWebApp', 'modelos', 'modelo_knn.pkl')
+with open(modelo_path, 'rb') as f:
     knn_mm = pickle.load(f)
 
 class CeliacaPredictionView(APIView):
@@ -14,7 +17,7 @@ class CeliacaPredictionView(APIView):
         # Usamos el serializer para validar los datos del formulario
         serializer = CeliacaPredictionSerializer(data=request.data)
         if serializer.is_valid():
-            # Obtener los datos para la predicción
+            # Obtener los datos para la predicción (ahora con 11 atributos)
             data = np.array([[
                 serializer.validated_data['AGE'],
                 serializer.validated_data['GENDER'],
@@ -25,7 +28,8 @@ class CeliacaPredictionView(APIView):
                 serializer.validated_data['WEIGHT_LOSS'],
                 serializer.validated_data['IGA'],
                 serializer.validated_data['IGG'],
-                serializer.validated_data['IGM']
+                serializer.validated_data['IGM'],
+                serializer.validated_data['DISEASE_DIAGNOSE']  # Añadido el atributo 'DISEASE_DIAGNOSE'
             ]])
             
             # Realizar la predicción
