@@ -173,3 +173,84 @@ label {
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+/* Estilos generales */
+body {
+    background-color: #8653ff;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Estilo para el título */
+.titulo {
+    background: linear-gradient(135deg, #d4d4d4, #e0e0e0); /* Degradado más suave */
+    color: #8c00ff;
+    font-size: 4.5rem;
+    font-weight: bold;
+    padding: 30px 60px;
+    border-radius: 25px;
+    margin: 60px auto;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    display: inline-block;
+    border: 6px solid #b39ddb;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.25);
+
+    /* Animación inicial */
+    animation: entradaSuave 1.2s ease-out both;
+
+    /* Transición para hover */
+    transition: all 0.4s ease-in-out;
+}
+
+/* Efecto hover sobre el título */
+.titulo:hover {
+    background: linear-gradient(135deg, #ce93d8, #f3e5f5);
+    color: #4a148c;
+    transform: scale(1.05);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Animación de entrada */
+@keyframes entradaSuave {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Estilo para la imagen */
+.imagen {
+    width: 60%;
+    max-width: 1500px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    margin-bottom: 30px;
+}
+
+/* Estilo para el botón */
+.btn-diagnostico {
+    background-color: #56f2fd;
+    color: rgb(82, 82, 82);
+    font-size: 1.4rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Efecto hover sobre el botón */
+.btn-diagnostico:hover {
+    background-color: #fffb08;
+    transform: scale(1.05);
+}
