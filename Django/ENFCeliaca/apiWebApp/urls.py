@@ -1,10 +1,6 @@
-from django.urls import path, include
-from rest_framework import routers 
-from apiWebApp.views import PatientViewSet
-
-router = routers.DefaultRouter()
-router.register(r'patients', PatientViewSet)
+from django.urls import path
+from .views import CeliacaPredictionView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('predict/', CeliacaPredictionView.as_view(), name='celiaca-predict')
 ]
