@@ -1,49 +1,34 @@
-import pickle
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
-from django.http import JsonResponse
+import pickle
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from .serializers import PredictionInputSerializer
+import os
+from django.conf import settings
 
-# Cargar el modelo KNN
-model_path = 'MLENFCeliaca/modelo_knn.pkl'
-with open(model_path, 'rb') as f:
-    knn_model = pickle.load(f)
-
-# Etiquetas para las clases
-clasificadores = ['No_tiene', 'Si_tiene']
+# Cargar el modelo entrenado
+model_path = os.path.join(settings.BASE_DIR, 'MLENFCeliaca', 'modelo_knn.pkl')
+with open(model_path, 'rb') as model_file:
+    knn_model = pickle.load(model_file)
 
 @api_view(['POST'])
 def predict_disease(request):
-    try:
-        # Obtener los datos enviados en formato JSON
-        data = request.data
-        features = np.array([
-            data['AGE'],
-            data['GENDER'],
-            data['DIABETES'],
-            data['DIABETES_TYPE'],
-            data['DIARRHOEA'],
-            data['SHORT_STATURE'],
-            data['STICKY_STOOL'],
-            data['WEIGHT_LOSS'],
-            data['IGA'],
-            data['IGG'],
-            data['IGM']
-        ]).reshape(1, -1)
+    serializer = PredictionInputSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    data = serializer.validated_data
+    features = np.array([[data[field] for field in serializer.fields]])
 
-        # Realizar la predicción
-        prediction = knn_model.predict(features)
-        prediction_prob = knn_model.predict_proba(features)
+    prediction = knn_model.predict(features)
+    probability = knn_model.predict_proba(features)[0]
 
-        # Resultado
-        result = {
-            'prediction': clasificadores[int(prediction[0])],
-            'probability': {
-                'No_tiene': prediction_prob[0][0],
-                'Si_tiene': prediction_prob[0][1]
-            }
+    result = {
+        'prediction': 'Enfermo' if prediction[0] == 1 else 'No Enfermo',
+        'probability': {
+            'No_tiene': round(probability[0], 4),
+            'Si_tiene': round(probability[1], 4)
         }
-
-        return JsonResponse(result, status=status.HTTP_200_OK
+    }
+    return Response(result)

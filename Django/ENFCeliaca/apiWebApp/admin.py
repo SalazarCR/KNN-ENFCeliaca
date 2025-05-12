@@ -1,4 +1,3 @@
 from django.contrib import admin
-from .models import Patient
 
-admin.site.register(Patient)
+# Aquí puedes registrar tus modelos si tienes alguna base de datos, por ahora dejamos vacío

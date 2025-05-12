@@ -1,15 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Formulario de Paciente</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Predicción</title>
 </head>
 <body>
-    <h1>Registrar Paciente</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar</button>
+    <h1>Predicción de Enfermedad Celíaca</h1>
+    <form id="prediction-form">
+        <label for="age">Edad:</label>
+        <input type="number" id="age" name="age"><br><br>
+
+        <label for="gender">Género (0 = Mujer, 1 = Hombre):</label>
+        <input type="number" id="gender" name="gender" min="0" max="1"><br><br>
+
+        <label for="diabetes">¿Diabetes? (0 = No, 1 = Sí):</label>
+        <input type="number" id="diabetes" name="diabetes" min="0" max="1"><br><br>
+
+        <label for="diabetes_type">Tipo de Diabetes (0 = Tipo 1, 1 = Tipo 2):</label>
+        <input type="number" id="diabetes_type" name="diabetes_type" min="0" max="1"><br><br>
+
+        <label for="diarrhoea">¿Diarrea? (0 = No, 1 = Sí):</label>
+        <input type="number" id="diarrhoea" name="diarrhoea" min="0" max="1"><br><br>
+
+        <label for="short_stature">¿Estatura Baja? (0 = No, 1 = Sí):</label>
+        <input type="number" id="short_stature" name="short_stature" min="0" max="1"><br><br>
+
+        <label for="sticky_stool">¿Heces Pegajosas? (0 = No, 1 = Sí):</label>
+        <input type="number" id="sticky_stool" name="sticky_stool" min="0" max="1"><br><br>
+
+        <label for="weight_loss">Pérdida de peso (0 = No, 1 = Sí):</label>
+        <input type="number" id="weight_loss" name="weight_loss" min="0" max="1"><br><br>
+
+        <label for="iga">IGA:</label>
+        <input type="number" id="iga" name="iga"><br><br>
+
+        <label for="igg">IGG:</label>
+        <input type="number" id="igg" name="igg"><br><br>
+
+        <label for="igm">IGM:</label>
+        <input type="number" id="igm" name="igm"><br><br>
+
+        <input type="submit" value="Predecir">
     </form>
-    <a href="{% url 'historial_pacientes' %}">Ver Historial</a>
+
+    <h3>Resultado:</h3>
+    <p id="result"></p>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = Number(value); // asegúrate de enviar números
+            });
+
+            fetch('/api/predict/', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerText =
+                    `Predicción: ${data.prediction}\nProbabilidad: ${JSON.stringify(data.probability, null, 2)}`;
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = `Error: ${err}`;
+            });
+        });
+    </script>
 </body>
 </html>
