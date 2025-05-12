@@ -1,43 +1,34 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CeliacaPredictionSerializer
-import pickle
+import joblib
+import os
 import numpy as np
 from django.conf import settings
 
-# Cargar el modelo KNN previamente entrenado
-with open('MLENFCeliaca/modelo_knn.pkl', 'rb') as f:
-    modelo_knn = pickle.load(f)
-
 class CeliacaPredictionView(APIView):
     def post(self, request):
-        # Usamos el serializer para validar los datos del formulario
-        serializer = CeliacaPredictionSerializer(data=request.data)
-        if serializer.is_valid():
-            # Obtener los datos para la predicción
-            data = np.array([[  # Toma los valores del formulario y crea el array
-                serializer.validated_data['AGE'],
-                serializer.validated_data['GENDER'],
-                serializer.validated_data['DIABETES'],
-                serializer.validated_data['DIARRHOEA'],
-                serializer.validated_data['SHORT_STATURE'],
-                serializer.validated_data['STICKY_STOOL'],
-                serializer.validated_data['WEIGHT_LOSS'],
-                serializer.validated_data['IGA'],
-                serializer.validated_data['IGG'],
-                serializer.validated_data['IGM'],
-                serializer.validated_data['DISEASE_DIAGNOSE']
-            ]])
-            
-            # Realizar la predicción
-            prediction = knn_mm.predict(data)
-            probability = knn_mm.predict_proba(data)
-            
-            # Devolver la respuesta
-            response = {
-                'prediction': 'Enfermo' if prediction[0] == 1 else 'No enfermo',
-                'probability': probability[0][1] * 100  # Probabilidad de estar enfermo
-            }
-            return Response(response, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            # Asegúrate de pasar los datos con keys correctas
+            datos = request.data.get("datos")
+
+            if datos is None:
+                return Response({"error": "Faltan los datos."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Cargar modelo
+            modelo_path = os.path.join(settings.BASE_DIR, 'modelo', 'modelo_entrenado.pkl')
+            modelo = joblib.load(modelo_path)
+
+            # Convertir datos en array
+            input_array = np.array(datos).reshape(1, -1)
+
+            # Realizar predicción
+            prediccion = modelo.predict(input_array)
+
+            return Response({"prediccion": int(prediccion[0])})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request):
+        return Response({"message": "Este endpoint solo acepta POST."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
