@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historial de Pacientes</title>
+</head>
+<body>
+    <h1>Historial de Pacientes</h1>
+    {% if datos %}
+    <table border="1">
+        <tr>
+            {% for key in datos.0.keys %}
+                <th>{{ key }}</th>
+            {% endfor %}
+        </tr>
+        {% for paciente in datos %}
+        <tr>
+            {% for value in paciente.values %}
+                <td>{{ value }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No hay pacientes registrados.</p>
+    {% endif %}
+    <a href="{% url 'formulario_paciente' %}">Volver al formulario</a>
+</body>
+</html>

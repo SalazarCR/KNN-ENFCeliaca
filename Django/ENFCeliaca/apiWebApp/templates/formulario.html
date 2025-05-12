@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulario de Paciente</title>
+</head>
+<body>
+    <h1>Registrar Paciente</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+    <a href="{% url 'historial_pacientes' %}">Ver Historial</a>
+</body>
+</html>

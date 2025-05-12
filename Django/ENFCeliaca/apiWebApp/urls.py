@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import CeliacaPredictionView
+from . import views
 
 urlpatterns = [
-    path('predict/', CeliacaPredictionView.as_view(), name='predict'),
+    path('formulario/', views.formulario_paciente, name='formulario_paciente'),
+    path('historial/', views.historial_pacientes, name='historial_pacientes'),
 ]

@@ -1,34 +1,49 @@
-from rest_framework.views import APIView
+import pickle
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-import joblib
-import os
-import numpy as np
-from django.conf import settings
 
-class CeliacaPredictionView(APIView):
-    def post(self, request):
-        try:
-            # Asegúrate de pasar los datos con keys correctas
-            datos = request.data.get("datos")
+# Cargar el modelo KNN
+model_path = 'MLENFCeliaca/modelo_knn.pkl'
+with open(model_path, 'rb') as f:
+    knn_model = pickle.load(f)
 
-            if datos is None:
-                return Response({"error": "Faltan los datos."}, status=status.HTTP_400_BAD_REQUEST)
+# Etiquetas para las clases
+clasificadores = ['No_tiene', 'Si_tiene']
 
-            # Cargar modelo
-            modelo_path = os.path.join(settings.BASE_DIR, 'modelo', 'modelo_entrenado.pkl')
-            modelo = joblib.load(modelo_path)
+@api_view(['POST'])
+def predict_disease(request):
+    try:
+        # Obtener los datos enviados en formato JSON
+        data = request.data
+        features = np.array([
+            data['AGE'],
+            data['GENDER'],
+            data['DIABETES'],
+            data['DIABETES_TYPE'],
+            data['DIARRHOEA'],
+            data['SHORT_STATURE'],
+            data['STICKY_STOOL'],
+            data['WEIGHT_LOSS'],
+            data['IGA'],
+            data['IGG'],
+            data['IGM']
+        ]).reshape(1, -1)
 
-            # Convertir datos en array
-            input_array = np.array(datos).reshape(1, -1)
+        # Realizar la predicción
+        prediction = knn_model.predict(features)
+        prediction_prob = knn_model.predict_proba(features)
 
-            # Realizar predicción
-            prediccion = modelo.predict(input_array)
+        # Resultado
+        result = {
+            'prediction': clasificadores[int(prediction[0])],
+            'probability': {
+                'No_tiene': prediction_prob[0][0],
+                'Si_tiene': prediction_prob[0][1]
+            }
+        }
 
-            return Response({"prediccion": int(prediccion[0])})
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def get(self, request):
-        return Response({"message": "Este endpoint solo acepta POST."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return JsonResponse(result, status=status.HTTP_200_OK
