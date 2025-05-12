@@ -1,6 +1,7 @@
+# apiWebApp/urls.py
 from django.urls import path
 from .views import CeliacaPredictionView
 
 urlpatterns = [
-    path('predict/', CeliacaPredictionView.as_view(), name='celiaca-predict')
+    path('predict/', CeliacaPredictionView.as_view(), name='predict'),
 ]
